@@ -1,0 +1,2 @@
+COPY stage_clientes
+FROM STDIN WITH CSV HEADER

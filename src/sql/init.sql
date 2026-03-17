@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS clientes (
 	id int PRIMARY KEY,
-	edad int,
+	edad float,
 	genero text,
 	fecha_registro date
 );
