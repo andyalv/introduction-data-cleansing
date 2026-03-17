@@ -9,11 +9,14 @@ logger = logging.getLogger(__name__)
 # Read a string from a file and return it.
 # If the file is empty or an error occurs during reading, it raises an exception.
 def read_file(file_path: Path) -> str:
-    validate_file_path(file_path)  # Ensure the file exists before attempting to read it
-
-    display_path = file_path.relative_to(PROJECT_ROOT)
-
     try:
+        # Ensure the file exists before attempting to read it by validating the file path.
+        #  This will raise a FileNotFoundError if the file does not exist, which we can catch and log appropriately.
+        validate_file_path(file_path)
+        display_path = file_path.relative_to(
+            PROJECT_ROOT
+        )  # Relative path for logging purposes
+
         # Read the content of the file as a string
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
@@ -22,6 +25,13 @@ def read_file(file_path: Path) -> str:
     except OSError as e:
         logger.exception(f"Error reading file at '{display_path}': {e}")
         raise OSError(f"Error reading file at '{display_path}': {e}") from e
+
+    # Catch any other unexpected exceptions that may occur during file reading, log them, and re-raise with a descriptive message.
+    except Exception as e:
+        logger.exception(f"Unexpected error reading file at '{display_path}': {e}")
+        raise Exception(
+            f"Unexpected error reading file at '{display_path}': {e}"
+        ) from e
 
     # If the content is empty (only whitespace), raise an exception
     if not content.strip():

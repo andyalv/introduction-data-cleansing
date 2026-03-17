@@ -1,8 +1,12 @@
+from io import StringIO
 import logging
+from pathlib import Path
 
 import psycopg2
 
 from src.config.settings import settings
+from src.paths import PROJECT_ROOT
+from src.utils.files import read_file, validate_file_path
 from src.utils.render import display_code_block
 
 logger = logging.getLogger(__name__)
@@ -34,5 +38,31 @@ def execute_sql_commands(
     except Exception as e:
         logger.error(f"Error executing SQL commands: {e}")
         raise Exception(f"Error executing SQL commands: {e}")
+    finally:
+        cursor.close()
+
+
+def copy_expert(
+    conn: psycopg2.extensions.connection, sql_command: str, file_path: Path
+) -> None:
+    try:
+        validate_file_path(file_path)
+        display_path = file_path.relative_to(PROJECT_ROOT)
+
+        cursor = conn.cursor()
+        content = read_file(file_path)
+        cursor.copy_expert(sql_command, StringIO(content))
+        conn.commit()
+        display_code_block(sql_command, lexer="sql", title="COPY Command Executed")
+        display_code_block(
+            code=content,
+            limit_code_lines=10,
+            lexer="text",
+            title=f"Data Copied from {display_path}",
+        )
+        logger.info(f"Data copied successfully from {display_path}")
+    except Exception as e:
+        logger.error(f"Error copying data from {file_path}: {e}")
+        raise Exception(f"Error copying data from {file_path}: {e}")
     finally:
         cursor.close()
