@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 from config.logging import start_logger
@@ -10,9 +11,9 @@ from utils.sql import (
 
 
 def main():
-    log = start_logger()
+    log = start_logger(level=logging.debug)
 
-    log.info("Initializing script...")
+    log.info("Initializing database...")
 
     # Get SQL commands from file
     sql_file_path = Path(__file__).parent / "sql" / "init.sql"
