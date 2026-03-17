@@ -1,9 +1,11 @@
+import logging
+
 import psycopg2
-from rich.console import Console
-from rich.panel import Panel
-from rich.syntax import Syntax
 
 from src.config.settings import settings
+from src.utils.render import display_code_block
+
+logger = logging.getLogger(__name__)
 
 
 # Connect to the PostgreSQL database using the provided connection parameters and return the connection object
@@ -27,15 +29,10 @@ def execute_sql_commands(
         cursor = conn.cursor()
         cursor.execute(sql_commands)
         conn.commit()
+        display_code_block(sql_commands, lexer="sql", title="Commands Executed")
+        logger.info("SQL commands executed successfully")
     except Exception as e:
+        logger.error(f"Error executing SQL commands: {e}")
         raise Exception(f"Error executing SQL commands: {e}")
     finally:
         cursor.close()
-
-
-# Print the provided SQL command in a formatted and visually appealing way using the rich library.
-def print_sql_command(sql_command: str, title: str = "SQL Command") -> None:
-    console = Console()
-    syntax = Syntax(sql_command, "sql", theme="monokai", line_numbers=True)
-    panel = Panel(syntax, title=title, border_style="blue")
-    console.print(panel)
