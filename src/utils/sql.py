@@ -42,6 +42,10 @@ def execute_sql_commands(
         cursor.close()
 
 
+# Copies data from a file to a PostgreSQL database using the COPY command.
+# It validates the file path, reads the content of the file, and executes the COPY command using a cursor.
+# If any error occurs during the process, it raises an exception with a descriptive message.
+# Finally, it ensures that the cursor is closed after execution.
 def copy_expert(
     conn: psycopg2.extensions.connection, sql_command: str, file_path: Path
 ) -> None:
@@ -52,7 +56,9 @@ def copy_expert(
         cursor = conn.cursor()
         content = read_file(file_path)
         cursor.copy_expert(sql_command, StringIO(content))
+
         conn.commit()
+
         display_code_block(sql_command, lexer="sql", title="COPY Command Executed")
         display_code_block(
             code=content,
@@ -60,6 +66,7 @@ def copy_expert(
             lexer="text",
             title=f"Data Copied from {display_path}",
         )
+
         logger.info(f"Data copied successfully from {display_path}")
     except Exception as e:
         logger.error(f"Error copying data from {file_path}: {e}")
