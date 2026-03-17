@@ -33,6 +33,7 @@ def execute_sql_commands(
         cursor.close()
 
 
+# Print the provided SQL command in a formatted and visually appealing way using the rich library.
 def print_sql_command(sql_command: str, title: str = "SQL Command") -> None:
     console = Console()
     syntax = Syntax(sql_command, "sql", theme="monokai", line_numbers=True)
