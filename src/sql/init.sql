@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS clientes (
 
 CREATE TABLE IF NOT EXISTS visitas_mensuales (
 	cliente_id int REFERENCES clientes(id),
-	cuenta int
+	cuenta_visitas int
 );
 
 CREATE TABLE IF NOT EXISTS compra_restaurante (
