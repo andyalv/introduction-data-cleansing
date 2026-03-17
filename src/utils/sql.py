@@ -3,7 +3,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.syntax import Syntax
 
-from config.settings import settings
+from src.config.settings import settings
 
 
 # Connect to the PostgreSQL database using the provided connection parameters and return the connection object
