@@ -5,7 +5,7 @@ from utils.sql import (
     connect_to_db,
     execute_sql_commands,
 )
-from src.paths import SQL_DIR
+from paths import SQL_DIR
 
 logger = logging.getLogger(__name__)
 
