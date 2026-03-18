@@ -49,27 +49,52 @@ def execute_sql_commands(
 def copy_expert(
     conn: psycopg2.extensions.connection, sql_command: str, file_path: Path
 ) -> None:
+    if "STDOUT" in sql_command.upper():
+        copy_expert_to_stdout(conn, sql_command, file_path)
+    elif "STDIN" in sql_command.upper():
+        copy_expert_to_stdin(conn, sql_command, file_path)
+    else:
+        raise ValueError("SQL command must contain either STDOUT or STDIN.")
+
+
+def copy_expert_to_stdin(
+    conn: psycopg2.extensions.connection, sql_command: str, file_path: Path
+) -> None:
     try:
         validate_file_path(file_path)
         display_path = file_path.relative_to(PROJECT_ROOT)
 
+        file_content = read_file(file_path)
         cursor = conn.cursor()
-        content = read_file(file_path)
-        cursor.copy_expert(sql_command, StringIO(content))
+        cursor.copy_expert(sql_command, StringIO(file_content))
 
         conn.commit()
 
         display_code_block(sql_command, lexer="sql", title="COPY Command Executed")
-        display_code_block(
-            code=content,
-            limit_code_lines=10,
-            lexer="text",
-            title=f"Data Copied from {display_path}",
-        )
-
-        logger.info(f"Data copied successfully from {display_path}")
+        logger.info(f"Data imported successfully from '{display_path}'")
     except Exception as e:
-        logger.error(f"Error copying data from {file_path}: {e}")
-        raise Exception(f"Error copying data from {file_path}: {e}")
+        logger.error(f"Error copying data from '{file_path}': {e}")
+        raise Exception(f"Error copying data from '{file_path}': {e}")
+    finally:
+        cursor.close()
+
+
+def copy_expert_to_stdout(
+    conn: psycopg2.extensions.connection, sql_command: str, file_path: Path
+) -> None:
+    try:
+        cursor = conn.cursor()
+
+        with open(file_path, "w", encoding="utf-8") as f:
+            cursor.copy_expert(sql_command, f)
+
+        conn.commit()
+        display_code_block(sql_command, lexer="sql", title="COPY Command Executed")
+
+        display_path = file_path.relative_to(PROJECT_ROOT)
+        logger.info(f"Data exported successfully to '{display_path}'")
+    except Exception as e:
+        logger.error(f"Error copying data to '{file_path}': {e}")
+        raise Exception(f"Error copying data to '{file_path}': {e}")
     finally:
         cursor.close()
